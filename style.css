@@ -1,0 +1,792 @@
+/* ==========================================================
+   トークン（色・フォント）
+   朝日町の「朝日」＝日の出をテーマにした配色
+   ========================================================== */
+:root {
+  --dark:    #172033;   /* 深いネイビー */
+  --ink:     #1f293b;   /* 濃い墨色 */
+  --gold:    #d8b56a;   /* 上品なゴールド */
+  --cream:   #f4efe7;   /* クリーム紙 */
+  --linen:   #e4d9c9;   /* リネンのベージ色 */
+  --soft:    #8b7a6e;   /* 柔らかいブラウン */
+  --line:    rgba(31, 41, 59, 0.12);
+
+  --font-display: "M PLUS Rounded 1c", sans-serif;
+  --font-body: "Noto Sans JP", sans-serif;
+}
+
+/* page top label (separate from :root) */
+.page-top {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin: 20px 0 36px 0;
+  padding: 12px 0 14px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: rgba(250,250,253,0.98);
+  background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.7));
+  border-radius: 999px;
+  letter-spacing: .06em;
+  z-index: 3;
+  font-size: clamp(22px, 3vw, 40px);
+  box-shadow: 0 8px 28px rgba(10,12,15,0.12);
+  backdrop-filter: blur(6px) saturate(120%);
+  position: relative;
+}
+
+.page-top .author-credit {
+  position: absolute;
+  right: 18px;
+  bottom: 6px;
+  background: transparent;
+  color: rgba(30,30,30,0.72);
+  padding: 2px 8px;
+  font-size: 12px;
+  border-radius: 6px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+@media (max-width: 980px) {
+  .page-top .author-credit { right: 12px; bottom: 6px; font-size: 11px; }
+}
+
+@media (max-width: 640px) {
+  .page-top .author-credit { display: none; }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--ink);
+  min-height: 100vh;
+  background: url('hero.jpg') fixed center/cover no-repeat;
+}
+
+/* ==========================================================
+   ヒーロー：洗練されたランドマーク
+   ========================================================== */
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 72px 20px 48px; /* 上:72 横:20 下:48 にして間隔を狭める */
+  background: transparent;
+  min-height: 420px;
+  text-align: center;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  pointer-events: none;
+}
+
+.hero__inner {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.hero__eyebrow {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: .18em;
+  color: var(--gold);
+  margin: 0 0 10px;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.hero__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(42px, 6vw, 64px);
+  color: #fff;
+  margin: 0 0 18px;
+  text-shadow: 0 14px 40px rgba(0,0,0,.35);
+  letter-spacing: -.04em;
+}
+
+.hero__title span { color: var(--gold); }
+
+.hero__sub {
+  font-size: 18px;
+  color: rgba(255,255,255,.88);
+  margin: 0 auto;
+  line-height: 1.8;
+  max-width: 620px;
+}
+
+/* ==========================================================
+   レイアウト
+   ========================================================== */
+.layout {
+  max-width: 1240px;
+  margin: -24px auto 0; /* ヒーローとレイアウトの隙間を小さく */
+  padding: 0 24px 44px;
+  display: grid;
+  /* デフォルトはスポット一覧 + 地図 の2カラム。追加フォームは管理者のみ表示 */
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 16px; /* 横のカラム間も狭める */
+  position: relative;
+  z-index: 2;
+}
+
+/* 管理者表示のときだけ追加フォーム用の3列レイアウトにする */
+body.admin-visible .layout {
+  grid-template-columns: 280px minmax(0, 1fr) 320px;
+}
+
+@media (max-width: 1080px) {
+  .layout { grid-template-columns: 1fr; }
+}
+
+.panel {
+  background: rgba(244, 239, 231, 0.96);
+  border: 1px solid rgba(31, 41, 59, 0.12);
+  border-radius: calc(var(--radius) + 4px);
+  box-shadow: 0 18px 40px rgba(31, 41, 59, 0.08);
+  padding: 22px;
+}
+
+/* 追加フォームは通常非表示、管理モードで表示 */
+.form-panel { display: none; }
+body.admin-visible .form-panel { display: block; }
+
+.panel__title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 800;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--dark);
+}
+
+.panel__icon {
+  width: 20px;
+  height: 20px;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+.count-badge {
+  background: var(--dark);
+  color: #fff;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-family: var(--font-body);
+}
+
+/* ==========================================================
+   スポット一覧
+   ========================================================== */
+.spot-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 560px;
+  overflow-y: auto;
+}
+
+.spot-card {
+  border: 1px solid rgba(31, 41, 59, 0.08);
+  border-radius: 18px;
+  padding: 16px 18px;
+  cursor: pointer;
+  background: #fff;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.spot-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 35px rgba(31,41,59,0.12);
+  border-color: rgba(216,181,106,0.45);
+}
+
+.spot-card__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.spot-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spot-card__memo {
+  font-size: 13px;
+  color: #6b6054;
+  margin: 0;
+  line-height: 1.7;
+}
+
+.spot-card__del {
+  float: right;
+  border: none;
+  background: none;
+  color: #9c8b7b;
+  cursor: pointer;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.spot-card__del:hover { color: var(--gold); }
+
+.empty-msg {
+  color: #9c8b7b;
+  font-size: 13px;
+  text-align: center;
+  padding: 26px 10px;
+}
+
+/* ==========================================================
+   地図
+   ========================================================== */
+.map-panel {
+  padding: 14px;
+}
+
+#map {
+  width: 100%;
+  height: 620px;
+  border-radius: 24px;
+  border: 1px solid rgba(31, 41, 59, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18), 0 20px 45px rgba(31,41,59,0.14);
+}
+
+.map-panel.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(40px);
+  will-change: opacity, transform;
+}
+
+.map-panel.animate-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.95s ease-out 0.08s, transform 0.95s ease-out 0.08s;
+}
+
+.map-hint {
+  font-size: 13px;
+  color: #6b6054;
+  text-align: center;
+  margin: 14px 6px 4px;
+}
+
+.street-view-card {
+  margin-top: 16px;
+  border-radius: 22px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.95);
+  border: 1px solid rgba(31, 41, 59, 0.08);
+  box-shadow: 0 16px 30px rgba(31,41,59,0.08);
+}
+
+.street-view-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(31, 41, 59, 0.08);
+}
+
+.street-view-card__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--dark);
+}
+
+.street-view-card__link {
+  font-size: 13px;
+  color: var(--gold);
+  text-decoration: none;
+}
+
+.street-view-card__link:hover {
+  text-decoration: underline;
+}
+
+/* Google Maps URL input row */
+.gm-url-row { display:flex; gap:8px; align-items:center; margin-top:10px; }
+.gm-url-row input { flex:1; padding:8px 10px; border-radius:8px; border:1px solid rgba(31,41,59,0.06); }
+.gm-url-row button { padding:8px 10px; border-radius:8px; }
+
+#streetViewFrame {
+  width: 100%;
+  height: 260px;
+  border: 0;
+  background: #f8f2e9;
+}
+
+.street-view-hint {
+  margin: 0;
+  padding: 12px 16px 16px;
+  color: #7b6f61;
+  font-size: 13px;
+}
+
+.assistant-panel {
+  margin-top: 18px;
+  border: 1px solid rgba(31, 41, 59, 0.08);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,245,238,0.98));
+  padding: 20px;
+}
+
+.assistant-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.assistant-panel__eyebrow {
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 4px;
+}
+
+.assistant-panel__title {
+  margin: 0;
+  font-size: 15px;
+  font-family: var(--font-display);
+  color: var(--dark);
+}
+
+.assistant-panel__history {
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 16px;
+  border: 1px solid rgba(31, 41, 59, 0.08);
+  border-radius: 18px;
+  background: #fffdfa;
+}
+
+.assistant-message {
+  margin: 0 0 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  line-height: 1.6;
+  font-size: 13px;
+}
+
+.assistant-message--bot {
+  background: #f7f1e8;
+  border: 1px solid rgba(31, 41, 59, 0.08);
+}
+
+.assistant-message--user {
+  background: rgba(216,181,106,0.16);
+  border: 1px solid rgba(216,181,106,0.28);
+  text-align: right;
+}
+
+.assistant-panel__form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.assistant-panel__form input {
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(31,41,59,0.12);
+  outline: none;
+  font-size: 13px;
+  background: #fff;
+}
+
+.assistant-panel__button {
+  border: none;
+  background: var(--dark);
+  color: #fff;
+  border-radius: 16px;
+  padding: 0 20px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ==========================================================
+   フッター
+   ========================================================== */
+.footer {
+  text-align: center;
+  padding: 24px;
+  font-size: 12px;
+  color: #7b6f61;
+}
+
+@media (max-width: 980px) {
+  .hero { background-position: center 60%; padding: 72px 16px 52px; min-height: 470px; }
+  .layout { padding: 0 18px 30px; }
+  #map { height: 520px; }
+}
+/* 管理バッジ（右上） */
+.admin-badge {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  background: rgba(31,41,59,0.88);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 9999;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+}
+
+/* 管理パネルオーバーレイ */
+.admin-panel-overlay {
+  position: fixed;
+  right: 20px;
+  top: 110px;
+  width: 420px;
+  max-width: calc(100% - 40px);
+  height: calc(100% - 160px);
+  z-index: 12000;
+  pointer-events: none;
+}
+.admin-panel-overlay[aria-hidden="false"] { pointer-events: auto; }
+.admin-panel {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,245,238,0.95));
+  border-radius: 16px;
+  box-shadow: 0 30px 60px rgba(10,12,20,0.35);
+  overflow: hidden;
+  transform: translateX(18px) scale(.99);
+  opacity: 0;
+  transition: transform .36s cubic-bezier(.2,.9,.3,1), opacity .28s ease;
+  display: flex;
+  flex-direction: column;
+}
+.admin-panel-overlay[aria-hidden="false"] .admin-panel { transform: translateX(0) scale(1); opacity: 1; }
+.admin-panel__head { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid rgba(31,41,59,0.05); }
+.admin-panel__head h3 { margin:0; font-family:var(--font-display); font-size:16px }
+.admin-tabs { display:flex; gap:6px; padding:12px 14px; border-bottom:1px solid rgba(31,41,59,0.04); }
+.admin-tab { background:transparent; border:none; padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:700; }
+.admin-tab--active { background: rgba(23,32,51,0.06); }
+.admin-content { padding:12px 14px; overflow:auto; flex:1; }
+.admin-content--hidden { display:none; }
+.admin-spot-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+.admin-spot-item { background:#fff; padding:10px; border-radius:10px; display:flex; align-items:flex-start; gap:8px; border:1px solid rgba(31,41,59,0.04); }
+.admin-spot-item .meta { flex:1 }
+.admin-spot-item .meta b { display:block; font-family:var(--font-display); margin-bottom:6px; }
+.admin-spot-item .meta small { color:#6b6054 }
+.admin-spot-item .controls { display:flex; gap:6px }
+.admin-toolbar { display:flex; gap:8px; margin-bottom:12px; }
+
+/* minor animations */
+@keyframes pulseIn { from { transform: scale(.98); opacity: .0 } to { transform: scale(1); opacity: 1 } }
+.admin-spot-item { animation: pulseIn .28s ease both; }
+
+@media (max-width: 980px) {
+  .admin-panel-overlay { right: 12px; top: 90px; width: 360px; }
+}
+
+
+/* PIN モーダル */
+.pin-modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 10000; pointer-events: none; }
+.pin-modal[aria-hidden="false"] { pointer-events: auto; }
+.pin-modal__backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.45); }
+.pin-modal__panel { position: relative; background: #fff; padding: 20px; border-radius: 12px; width: 360px; max-width: calc(100% - 40px); box-shadow: 0 18px 50px rgba(0,0,0,0.35); z-index: 2; }
+.pin-modal__panel h3 { margin: 0 0 8px; font-family: var(--font-display); font-size: 16px; }
+.pin-modal__desc { margin: 0 0 12px; color: #6b6054; font-size: 13px; }
+.pin-modal__panel input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line); font-size: 15px; margin-bottom: 12px; }
+.pin-modal__actions { display: flex; justify-content: flex-end; gap: 8px; }
+.btn-small { padding: 8px 12px; border-radius: 10px; border: none; background: var(--dark); color: #fff; cursor: pointer; }
+.btn-ghost { background: transparent; color: var(--dark); border: 1px solid rgba(31,41,59,0.06); }
+
+/* レスポンシブの微調整 */
+@media (max-width: 900px) {
+  .admin-badge { display: none; }
+  .layout { gap: 14px; }
+  #map { height: 460px; }
+  .panel { padding: 14px; border-radius: 12px; }
+  .street-view-card { margin-top: 12px; }
+}
+
+@media (max-width: 640px) {
+  .hero { padding: 40px 12px 40px; min-height: 360px; }
+  #map { height: 380px; }
+  .assistant-panel__history { max-height: 180px; }
+}
+
+
+/* ==================================================
+   管理者用ギミック：デフォルトは地図だけ表示する最小化表示
+   管理モードで左右のパネルを表示できる（隠しコマンドで切替）
+   ==================================================*/
+body.minimal-view .spot-panel,
+body.minimal-view .form-panel,
+body.minimal-view .footer {
+  display: none !important;
+}
+
+body.minimal-view .layout {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  grid-template-columns: 1fr !important;
+}
+
+body.minimal-view #map {
+  height: calc(100vh - 40px) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* 管理者表示中は小さなバッジを表示（クリックで管理モード終了） */
+.admin-badge {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  background: rgba(23,32,51,0.9);
+  color: #fff;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 999px;
+  font-size: 12px;
+  font-family: var(--font-body);
+  display: none;
+  z-index: 9999;
+  cursor: pointer;
+  transition: background .15s ease;
+}
+.admin-badge:hover { background: rgba(23,32,51,1); }
+
+body.admin-visible .admin-badge { display: inline-flex; align-items: center; gap:8px; }
+
+/* 小さなヒント（非表示モード時に地図の角に出す） */
+/* secret-hint removed — no visible instructions to avoid exposing admin toggle */
+
+/* PIN モーダル */
+.pin-modal { display: none; }
+.pin-modal[aria-hidden="false"] { display: block; position: fixed; inset: 0; z-index: 10000; }
+.pin-modal__backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.45); }
+.pin-modal__panel { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: #fff; border-radius: 12px; padding: 20px; width: 320px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); }
+.pin-modal__panel h3 { margin: 0 0 8px; font-size: 16px; font-family: var(--font-display); }
+.pin-modal__desc { margin: 0 0 12px; color: #6b6054; font-size: 13px; }
+.pin-modal__panel input { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(31,41,59,0.08); margin-bottom: 12px; font-size: 15px; }
+.pin-modal__actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* Leaflet のポップアップをテーマに合わせる */
+.leaflet-popup-content-wrapper {
+  border-radius: 10px;
+  font-family: var(--font-body);
+}
+.leaflet-popup-content b {
+  font-family: var(--font-display);
+}
+
+/* ==========================================================
+   フォーム
+   ========================================================== */
+.field {
+  display: block;
+  margin-bottom: 14px;
+}
+
+.field__label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--forest);
+  margin-bottom: 5px;
+}
+
+input, select, textarea {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ink);
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--coral);
+  outline-offset: 1px;
+}
+
+.coords-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.gm-url-status {
+  margin: 6px 0 0;
+  font-size: 12px;
+  min-height: 1.2em;
+}
+.gm-url-status--ok { color: var(--forest, #2f6b4f); }
+.gm-url-status--error { color: var(--coral, #ff6f59); }
+
+.btn-add {
+  width: 100%;
+  padding: 11px;
+  border: none;
+  border-radius: 10px;
+  background: var(--coral);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background .15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-add__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-add:hover { background: #e85b46; }
+
+.btn-reset {
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  background: none;
+  color: #a99d82;
+  font-size: 12px;
+  cursor: pointer;
+}
+.btn-reset:hover { border-color: var(--coral); color: var(--coral); }
+
+.assistant-panel {
+  margin-top: 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  padding: 16px;
+}
+
+.assistant-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.assistant-panel__eyebrow {
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--coral);
+  margin: 0 0 4px;
+}
+
+.assistant-panel__title {
+  margin: 0;
+  font-size: 15px;
+  font-family: var(--font-display);
+}
+
+.assistant-panel__history {
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fbf6ef;
+}
+
+.assistant-message {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  line-height: 1.5;
+  font-size: 13px;
+}
+
+.assistant-message--bot {
+  background: #fff;
+  border: 1px solid rgba(38,49,79,.08);
+}
+
+.assistant-message--user {
+  background: #ffefe8;
+  border: 1px solid rgba(255,111,89,.35);
+  text-align: right;
+}
+
+.assistant-panel__form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.assistant-panel__form input {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  outline: none;
+  font-size: 13px;
+}
+
+.assistant-panel__button {
+  border: none;
+  background: var(--coral);
+  color: #fff;
+  border-radius: 12px;
+  padding: 0 18px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ==========================================================
+   フッター
+   ========================================================== */
+.footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 12px;
+  color: #a99d82;
+}
+
+@media (max-width: 980px) {
+  .hero { background-position: center 60%; padding: 52px 16px 52px; min-height: 420px; }
+}
