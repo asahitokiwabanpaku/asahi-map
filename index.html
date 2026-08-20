@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>越前町たんけんマップ</title>
+
+<!-- Leaflet（地図を表示するための道具） -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- フォント -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ==== ヘッダー（朝日がのぼる演出） ==== -->
+  <header class="hero">
+    <div class="sun" aria-hidden="true"></div>
+    <div class="hero__inner">
+      <h1 class="hero__title">朝日町<span>たんけん</span>マップ</h1>
+    </div>
+  </header>
+
+  <main class="layout">
+
+    <!-- ==== 左：スポット一覧 ==== -->
+    <section class="panel spot-panel" aria-label="スポット一覧">
+      <h2 class="panel__title"><svg class="panel__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a6 6 0 0 1 6 6c0 4.4-5.4 10.3-5.7 10.6a.5.5 0 0 1-.6 0C11.4 19.8 6 13.9 6 9.5a6 6 0 0 1 6-6Zm0 3a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z" fill="currentColor"/></svg> スポットいちらん <span id="spotCount" class="count-badge">0</span></h2>
+      <ul id="spotList" class="spot-list"></ul>
+    </section>
+
+    <!-- ==== 中央：地図 ==== -->
+    <section class="panel map-panel" aria-label="地図">
+      <div id="map"></div>
+      <div class="street-view-card" aria-hidden="false">
+        <div class="street-view-card__header">
+          <h4 class="street-view-card__title" id="streetViewTitle"></h4>
+          <a id="streetViewLink" class="street-view-card__link" href="#" target="_blank" rel="noreferrer noopener">Google Mapsで開く</a>
+        </div>
+        <iframe id="streetViewFrame" title="Google Maps embed" src="" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </section>
+
+    <!-- ==== 右：スポット追加フォーム ==== -->
+    <section class="panel form-panel" aria-label="スポットを追加">
+      <h2 class="panel__title"><svg class="panel__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 16.5l3-1 8.5-8.5 2.5 2.5-8.5 8.5-3 1Z" fill="currentColor"/><path d="M14 5.5l2.5 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg> スポットをついか</h2>
+      <form id="spotForm">
+        <label class="field">
+          <span class="field__label">名前</span>
+          <input type="text" id="inputName" placeholder="例：朝日山公園" required>
+        </label>
+
+        <label class="field">
+          <span class="field__label">カテゴリー</span>
+          <select id="inputCategory">
+            <option value="nature">🌳 自然</option>
+            <option value="history">🏯 歴史・文化</option>
+            <option value="food">🍙 食べ物</option>
+            <option value="play">🎡 あそび場</option>
+            <option value="public">🏛️ 公共</option>
+            <option value="other">⭐ その他</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="field__label">おすすめポイント</span>
+          <textarea id="inputMemo" rows="3" placeholder="どうしておすすめなのか書こう"></textarea>
+        </label>
+
+        <label class="field">
+          <span class="field__label">Google MapsのURL（貼り付けると自動入力）</span>
+          <input type="text" id="inputGmUrl" placeholder="例：https://maps.google.com/?q=35.9,136.1 など">
+          <p id="gmUrlStatus" class="gm-url-status"></p>
+        </label>
+
+        <div class="field field--coords">
+          <span class="field__label">場所（地図クリック／URL貼り付けで自動入力、手入力もOK）</span>
+          <div class="coords-row">
+            <input type="number" id="inputLat" placeholder="緯度" step="0.000001" required>
+            <input type="number" id="inputLng" placeholder="経度" step="0.000001" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-add"><span class="btn-add__icon"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span> 地図に追加する</button>
+      </form>
+
+      <button id="resetBtn" class="btn-reset" type="button">はじめのデータに戻す</button>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>福井県丹生郡越前町のおすすめ所マップ（理科作品）</p>
+  </footer>
+
+  <!-- 管理PINダイアログ（通常は非表示） -->
+  <div id="pinModal" class="pin-modal" aria-hidden="true">
+    <div class="pin-modal__backdrop"></div>
+    <div class="pin-modal__panel" role="dialog" aria-modal="true" aria-labelledby="pinModalTitle">
+      <h3 id="pinModalTitle">管理者コードを入力</h3>
+      <p class="pin-modal__desc">管理者用のコードを入力してください。</p>
+      <input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" placeholder="コード" />
+      <div class="pin-modal__actions">
+        <button id="pinCancel" class="btn-small btn-ghost" type="button">キャンセル</button>
+        <button id="pinOk" class="btn-small" type="button">開く</button>
+      </div>
+    </div>
+  </div>
+  <!-- 管理パネル（管理モード時に表示） -->
+  <aside id="adminPanel" class="admin-panel-overlay" aria-hidden="true">
+    <div class="admin-panel">
+      <header class="admin-panel__head">
+        <h3>管理パネル</h3>
+        <div class="admin-panel__actions">
+          <button id="adminClose" class="btn-small btn-ghost" aria-label="閉じる">閉じる</button>
+        </div>
+      </header>
+
+      <nav class="admin-tabs" role="tablist">
+        <button class="admin-tab admin-tab--active" data-tab="spots">スポット</button>
+        <button class="admin-tab" data-tab="add">追加</button>
+        <button class="admin-tab" data-tab="tools">ツール</button>
+      </nav>
+
+      <section class="admin-content" id="adminSpots">
+        <ul id="adminSpotList" class="admin-spot-list"></ul>
+      </section>
+
+      <section class="admin-content admin-content--hidden" id="adminAdd">
+        <form id="adminAddForm">
+          <label>名前<input id="adminName" required></label>
+          <label>カテゴリー<select id="adminCategory">
+            <option value="nature">自然</option>
+            <option value="history">歴史・文化</option>
+            <option value="food">食べ物</option>
+            <option value="play">あそび場</option>
+            <option value="sweet">お菓子屋</option>
+            <option value="public">公共</option>
+            <option value="other">その他</option>
+          </select></label>
+          <label>メモ<textarea id="adminMemo"></textarea></label>
+          <label>Google MapsのURL（貼り付けると自動入力）<input type="text" id="adminGmUrl" placeholder="例：https://maps.google.com/?q=35.9,136.1 など"></label>
+          <p id="adminGmUrlStatus" class="gm-url-status"></p>
+          <label>緯度<input id="adminLat" type="number" step="0.000001" required></label>
+          <label>経度<input id="adminLng" type="number" step="0.000001" required></label>
+          <div style="display:flex;gap:8px;margin-top:8px;"><button type="submit" class="btn-small">追加</button><button id="adminCancelAdd" type="button" class="btn-small btn-ghost">キャンセル</button></div>
+        </form>
+      </section>
+
+      <section class="admin-content admin-content--hidden" id="adminTools">
+        <div class="admin-toolbar">
+          <button id="exportBtn" class="btn-small">エクスポート</button>
+          <button id="importBtn" class="btn-small btn-ghost">インポート</button>
+          <button id="undoBtn" class="btn-small">取り消し</button>
+          <button id="restoreSamplesBtn" class="btn-small btn-ghost">サンプルを復元</button>
+          <button id="clearBtn" class="btn-small btn-ghost">全スポット削除</button>
+          <button id="downloadCsvBtn" class="btn-small">CSVダウンロード</button>
+          <input id="importFile" type="file" accept="application/json" style="display:none"/>
+        </div>
+        <div style="margin-top:12px;color:#6b6054;font-size:13px;">ここから管理者向けのデータ操作（インポート／エクスポート／全削除など）を行えます。</div>
+      </section>
+    </div>
+  </aside>
+  <script src="spots.js"></script>
+  </body>
+</html>
